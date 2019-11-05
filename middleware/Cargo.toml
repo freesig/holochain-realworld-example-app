@@ -1,0 +1,24 @@
+[package]
+name = "middleware"
+version = "0.1.0"
+authors = ["Tom Gowan <tomrgowan@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "middleware"
+path = "src/bin/main.rs"
+
+[lib]
+name = "middleware"
+path = "src/lib/lib.rs"
+
+[dependencies]
+actix-web = "1.0.8"
+websocket = "0.23.0"
+color-backtrace = "0.2.3"
+serde = "1.0.102"
+serde_json = "1.0.41"
+
+[dev-dependencies]
+color-backtrace = "0.2.3"
