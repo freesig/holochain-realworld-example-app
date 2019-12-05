@@ -18,6 +18,7 @@ pub fn run() {
             .service(rest::auth::login)
             .service(rest::auth::current_user)
             .service(rest::auth::update_user)
+            .service(rest::articles::list_articles)
     })
     .bind("localhost:3000")
     .unwrap()

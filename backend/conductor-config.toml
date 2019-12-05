@@ -1,0 +1,35 @@
+[[agents]]
+id = 'alice'
+name = 'Alice'
+keystore_file = 'alice.key'
+public_address = 'HcScjdwyq86W3w5y3935jKTcs4x9H9Pev898Ui5J36Sr7TUzoRjMhoNb9fikqez'
+test_agent = true
+
+[[dnas]]
+file = 'dist/backend.dna.json'
+hash = 'QmaLRBhLC4yBunfZcYgoeP5RYr2kSj6zq9p4ZPPKFociBy'
+id = 'hc-run-dna'
+
+[[instances]]
+agent = 'alice'
+dna = 'hc-run-dna'
+id = 'test-instance'
+
+[instances.storage]
+type = "memory"
+
+[[interfaces]]
+admin = true
+id = 'websocket-interface'
+
+[[interfaces.instances]]
+id = 'test-instance'
+
+[interfaces.driver]
+port = 3401
+type = 'websocket'
+
+[network]
+type = 'sim2h'
+sim2h_url = 'wss://localhost:9000'
+

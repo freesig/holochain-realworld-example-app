@@ -1,4 +1,3 @@
-use std::io::stdin;
 use std::net::TcpStream;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
@@ -7,9 +6,9 @@ use websocket::client::{
     sync::{Reader, Writer},
     ClientBuilder,
 };
-use websocket::{Message, OwnedMessage};
+use websocket::OwnedMessage;
 
-const CONNECTION: &'static str = "ws://localhost:3401";
+//const CONNECTION: &'static str = "ws://localhost:3401";
 
 #[cfg(test)]
 mod tests;
@@ -74,7 +73,7 @@ Loop through the outgoing calls and send them to the websocket.
 fn outgoing(outgoing_rx: Receiver<String>, mut ws_sender: Writer<TcpStream>) {
     thread::spawn(move || {
         for call in outgoing_rx.iter() {
-            ws_sender.send_message(&OwnedMessage::Text(call));
+            ws_sender.send_message(&OwnedMessage::Text(call)).ok();
         }
     });
 }
