@@ -15,6 +15,7 @@ holochain_json_derive = "=0.0.1-alpha2"
 chrono = { version = "0.4.6", features = ["serde"] }
 validator = "0.10.0"
 validator_derive = "0.10.0"
+types = { path = "../../../../types" }
 
 [lib]
 path = "src/lib.rs"
