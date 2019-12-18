@@ -12,7 +12,7 @@ test_agent = true
 
 [[dnas]]
 file = '/home/tomgowan/holochain/holochain-realworld-example-app/backend/dist/backend.dna.json'
-hash = 'QmYGr2P4HbcsQ2zNMZS1mD2bipPiQuyTx7R97jnefjZoPq'
+hash = 'QmRxTsQWp4nsKwN3QZdjyCfVVe7dH37rR6CB1x4ThoUTJb'
 id = 'hc-run-dna'
 
 [[instances]]

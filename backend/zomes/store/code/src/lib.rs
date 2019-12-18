@@ -4,6 +4,7 @@ use hdk::prelude::*;
 use hdk_proc_macros::zome;
 
 mod articles;
+mod author;
 mod types;
 
 use types::{Article, Author};
@@ -25,7 +26,7 @@ mod my_zome {
     fn author_def() -> ValidatingEntryType {
         Author::entry_def()
     }
-    
+
     #[entry_def]
     fn article_def() -> ValidatingEntryType {
         Article::entry_def()
@@ -33,23 +34,39 @@ mod my_zome {
 
     #[zome_fn("hc_public")]
     pub fn list_articles() -> ZomeApiResult<Vec<Article>> {
-        hdk::utils::get_links_and_load_type(*hdk::AGENT_ADDRESS, LinkMatch::Exactly("articles"), LinkMatch::Any)
+        hdk::utils::get_links_and_load_type(
+            *hdk::AGENT_ADDRESS,
+            LinkMatch::Exactly("articles"),
+            LinkMatch::Any,
+        )
     }
 
     #[zome_fn("hc_public")]
     pub fn create_article(article: Article) -> ZomeApiResult<Address> {
         articles::create_article(article)
     }
-    
+
     #[zome_fn("hc_public")]
     pub fn get_author(address: Address) -> ZomeApiResult<Author> {
         hdk::utils::get_as_type(address)
     }
-    
+
+    #[zome_fn("hc_public")]
+    pub fn register(author: Author) -> ZomeApiResult<Address> {
+        author::register(author)
+    }
+
     #[zome_fn("hc_public")]
     pub fn get_me() -> ZomeApiResult<Author> {
-        let author = hdk::utils::get_links_and_load_type(*hdk::AGENT_ADDRESS, LinkMatch::Exactly("author"), LinkMatch::Any)?;
-        author.into_iter().next().ok_or_else(|| ZomeApiError::Internal("Missing Author".into()))
+        let author = hdk::utils::get_links_and_load_type(
+            *hdk::AGENT_ADDRESS,
+            LinkMatch::Exactly("author"),
+            LinkMatch::Any,
+        )?;
+        author
+            .into_iter()
+            .next()
+            .ok_or_else(|| ZomeApiError::Internal("Missing Author".into()))
     }
-    
+
 }

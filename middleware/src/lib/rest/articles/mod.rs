@@ -2,12 +2,13 @@ use crate::ws::ZomeCall;
 use crate::State;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use crate::types::CreateArticle;
+use serde_json::json;
 
 mod handler;
 
 #[get("/api/articles")]
 fn list_articles(data: web::Data<State>) -> impl Responder {
-    let list_articles = ZomeCall::new("test-instance", "store", "list_articles", None);
+    let list_articles = ZomeCall::new("test-instance", "store", "list_articles", json!({}));
     let result = data.connection.call(&list_articles).and_then(|r| r.inner());
     if let Ok(result) = result {
         dbg!(&result);

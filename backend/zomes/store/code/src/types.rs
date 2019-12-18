@@ -28,6 +28,7 @@ use validator::Validate;
 #[derive(Serialize, Deserialize, Debug, DefaultJson, Clone, validator_derive::Validate)]
 pub struct Author {
     pub username: String,
+    pub email: String,
     pub bio: String,
     #[validate(url)]
     pub image: String,
@@ -107,9 +108,7 @@ impl Author {
         )
     }
 
-    /*
     pub(crate) fn entry(self) -> Entry {
         Entry::App("author".into(), self.into())
     }
-    */
 }

@@ -1,6 +1,7 @@
 use std::net::TcpStream;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
+use serde_json::Value;
 
 use websocket::client::{
     sync::{Reader, Writer},
@@ -15,6 +16,7 @@ mod tests;
 pub enum Error {
     ConnectionFailed,
     CallFailed,
+    NotResponse,
     Json(serde_json::Error),
     Response(String),
 }
@@ -32,7 +34,7 @@ pub struct ZomeCall {
     instance: String,
     zome: String,
     function: String,
-    //args: Option<Vec<String>>,
+    args: Value, 
 }
 /**
 ## Connect to the websocket
@@ -87,7 +89,7 @@ fn incoming(incoming_tx: Sender<String>, mut ws_reciever: Reader<TcpStream>) {
 }
 
 impl ZomeCall {
-    pub fn new<T>(instance: T, zome: T, function: T, _args: Option<Vec<String>>) -> Self
+    pub fn new<T>(instance: T, zome: T, function: T, args: Value) -> Self
     where
         T: Into<String>,
     {
@@ -95,13 +97,15 @@ impl ZomeCall {
             instance: instance.into(),
             zome: zome.into(),
             function: function.into(),
-            //args,
+            args,
         }
     }
     //{"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": "test-instance", "zome": "hello", "function": "hello_holo", "args": {} }}
     fn json(&self) -> String {
-        let json = serde_json::json!({"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": self.instance, "zome": self.zome, "function": self.function, "args": {} }});
-        json.to_string()
+        let json = serde_json::json!({"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": self.instance, "zome": self.zome, "function": self.function, "args": self.args}});
+        let r = json.to_string();
+        dbg!(&r);
+        r
     }
 }
 
@@ -121,19 +125,28 @@ impl Connection {
     */
     pub fn call(&self, zome_call: &ZomeCall) -> Result<Response, Error> {
         self.outgoing_tx.send(zome_call.json()).ok();
+        for payload in self.incoming_rx.iter() {
+            let r = Response { payload };
+            if let Err(Error::NotResponse) = r.inner() {
+                continue;
+            } else {
+                return Ok(r);
+            }
+        }
+        Err(Error::ConnectionFailed)
+        /*
         self.incoming_rx
             .recv()
             .map_err(|_| Error::ConnectionFailed)
             .map(|payload| Response { payload })
+        */
     }
 }
 
 impl Response {
-    pub fn inner(&self) -> Result<String, Error> 
-    {
-        use serde_json::Value;
-        //use std::convert::TryInto;
+    pub fn inner(&self) -> Result<String, Error> {
         let result: Value = serde_json::from_str(&self.payload).map_err(|e| Error::Json(e))?;
+        dbg!(&result);
         match result {
             Value::Object(v) => {
                 if let Some(Value::String(s)) = v.get("result") {
@@ -149,7 +162,7 @@ impl Response {
                         Err(Error::Response("Invalid return type".into()))
                     }
                 } else {
-                    Err(Error::Response("Missing result".into()))
+                    Err(Error::NotResponse)
                 }
             }
             _ => Err(Error::Response("Wrong format from ".into())),

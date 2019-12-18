@@ -14,8 +14,8 @@ pub fn create_article(
     let create_article = ZomeCall::new(
         "test-instance",
         "store",
-        "create_articles",
-        Some(vec![article]),
+        "create_article",
+        json!({"article": article}),
     );
     let result = connection.call(&create_article).and_then(|r| r.inner());
     dbg!(&result);
@@ -25,7 +25,7 @@ pub fn create_article(
 }
 
 pub fn get_me(connection: &ws::Connection) -> Result<hc_types::Address, String> {
-    let author = ZomeCall::new("test-instance", "store", "get_me", None);
+    let author = ZomeCall::new("test-instance", "store", "get_me", json!({}));
     let result = connection.call(&author).and_then(|r| r.inner());
     dbg!(&result);
     result.map_err(|e| e.into())
