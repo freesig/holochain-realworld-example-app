@@ -8,8 +8,6 @@ use websocket::client::{
 };
 use websocket::OwnedMessage;
 
-//const CONNECTION: &'static str = "ws://localhost:3401";
-
 #[cfg(test)]
 mod tests;
 
@@ -34,7 +32,7 @@ pub struct ZomeCall {
     instance: String,
     zome: String,
     function: String,
-    args: Option<Vec<String>>,
+    //args: Option<Vec<String>>,
 }
 /**
 ## Connect to the websocket
@@ -89,7 +87,7 @@ fn incoming(incoming_tx: Sender<String>, mut ws_reciever: Reader<TcpStream>) {
 }
 
 impl ZomeCall {
-    pub fn new<T>(instance: T, zome: T, function: T, args: Option<Vec<String>>) -> Self
+    pub fn new<T>(instance: T, zome: T, function: T, _args: Option<Vec<String>>) -> Self
     where
         T: Into<String>,
     {
@@ -97,7 +95,7 @@ impl ZomeCall {
             instance: instance.into(),
             zome: zome.into(),
             function: function.into(),
-            args,
+            //args,
         }
     }
     //{"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": "test-instance", "zome": "hello", "function": "hello_holo", "args": {} }}
@@ -131,8 +129,10 @@ impl Connection {
 }
 
 impl Response {
-    pub fn inner(&self) -> Result<serde_json::Value, Error> {
+    pub fn inner(&self) -> Result<String, Error> 
+    {
         use serde_json::Value;
+        //use std::convert::TryInto;
         let result: Value = serde_json::from_str(&self.payload).map_err(|e| Error::Json(e))?;
         match result {
             Value::Object(v) => {
@@ -142,7 +142,7 @@ impl Response {
                         _ => return Err(Error::Response("Invalid return type".into())),
                     };
                     if let Some(result) = result.get("Ok") {
-                        Ok(result.clone())
+                        Ok(result.to_string())
                     } else if let Some(error) = result.get("Err") {
                         Err(Error::Response(format!("Zome error {:?}", error)))
                     } else {
@@ -157,3 +157,8 @@ impl Response {
     }
 }
 
+impl From<Error> for String {
+    fn from(e: Error) -> Self {
+        format!("Holochain Error: {:?}", e)
+    }
+}
