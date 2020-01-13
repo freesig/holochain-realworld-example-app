@@ -24,11 +24,22 @@ use validator::Validate;
 }
 */
 
-
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone, validator_derive::Validate)]
-pub struct Author {
+#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+pub struct UserRequest {
     pub username: String,
     pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone, validator_derive::Validate)]
+pub struct User {
+    pub username: String,
+    #[validate(email)]
+    pub email: String,
+    pub profile: Address,
+}
+
+#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone, Default, validator_derive::Validate)]
+pub struct Profile {
     pub bio: String,
     #[validate(url)]
     pub image: String,
@@ -58,8 +69,12 @@ impl Article {
             validation_package: || {
                 hdk::ValidationPackageDefinition::Entry
             },
-            validation: | _validation_data: hdk::EntryValidationData<Article>| {
-                Ok(())
+            validation: | validation_data: hdk::EntryValidationData<Article>| {
+                match validation_data {
+                    EntryValidationData::Create{ entry, ..} => entry.validate(),
+                    EntryValidationData::Modify{ new_entry, ..} => new_entry.validate(),
+                    _ => Ok(()),
+                }
             },
             links: [
                 from!(
@@ -79,24 +94,68 @@ impl Article {
     pub(crate) fn entry(self) -> Entry {
         Entry::App("article".into(), self.into())
     }
+
+    fn validate(&self) -> Result<(), String> {
+        if self.title.is_empty() {
+            Err("Title cannot be empty".into())
+        } else if self.description.is_empty() {
+            Err("Description cannot be empty".into())
+        } else if self.body.is_empty() {
+            Err("Body cannot be empty".into())
+        } else {
+            Ok(())
+        }
+    }
 }
 
-impl Author {
+impl Profile {
     pub(crate) fn entry_def() -> ValidatingEntryType {
         entry!(
-            name: "author",
-            description: "A article author",
+            name: "profile",
+            description: "A users profile",
             sharing: Sharing::Public,
             validation_package: || {
                 hdk::ValidationPackageDefinition::Entry
             },
-            validation: | _validation_data: hdk::EntryValidationData<Author>| {
+            validation: | _validation_data: hdk::EntryValidationData<Profile>| {
                 Ok(())
+            }
+        )
+    }
+
+    pub(crate) fn entry(self) -> Entry {
+        Entry::App("profile".into(), self.into())
+    }
+}
+
+impl User {
+    pub (crate) fn new(user_request: UserRequest, profile: Address) -> Self {
+        User{
+            username: user_request.username,
+            email: user_request.email,
+            profile,
+        }
+    }
+
+    pub(crate) fn entry_def() -> ValidatingEntryType {
+        entry!(
+            name: "user",
+            description: "A user",
+            sharing: Sharing::Public,
+            validation_package: || {
+                hdk::ValidationPackageDefinition::Entry
+            },
+            validation: | validation_data: hdk::EntryValidationData<User>| {
+                match validation_data {
+                    EntryValidationData::Create{ entry, ..} => entry.validate().map_err(|e| format!("{:?}", e)),
+                    EntryValidationData::Modify{ new_entry, ..} => new_entry.validate().map_err(|e| format!("{:?}", e)),
+                    _ => Ok(())
+                }
             },
             links: [
                 from!(
                     "%agent_id",
-                    link_type: "author",
+                    link_type: "user",
                     validation_package: || {
                         hdk::ValidationPackageDefinition::Entry
                     },
@@ -109,6 +168,6 @@ impl Author {
     }
 
     pub(crate) fn entry(self) -> Entry {
-        Entry::App("author".into(), self.into())
+        Entry::App("user".into(), self.into())
     }
 }

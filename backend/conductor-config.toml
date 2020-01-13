@@ -12,7 +12,7 @@ test_agent = true
 
 [[dnas]]
 file = '/home/tomgowan/holochain/holochain-realworld-example-app/backend/dist/backend.dna.json'
-hash = 'QmRxTsQWp4nsKwN3QZdjyCfVVe7dH37rR6CB1x4ThoUTJb'
+hash = 'QmXL5Fw7bGQiDVLdTxqpqAGR7UiMkXFFNyrYsh1JaUsVby'
 id = 'hc-run-dna'
 
 [[instances]]
@@ -42,7 +42,7 @@ type = 'debug'
 rules = []
 
 [network]
-sim2h_url = 'wss://localhost:9000'
+sim2h_url = 'ws://localhost:9000'
 type = 'sim2h'
 
 [passphrase_service]

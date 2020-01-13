@@ -4,10 +4,11 @@ use hdk::prelude::*;
 use hdk_proc_macros::zome;
 
 mod articles;
-mod author;
+mod profile;
+mod user;
 mod types;
 
-use types::{Article, Author};
+use types::{Article, Profile, User};
 
 #[zome]
 mod my_zome {
@@ -23,8 +24,13 @@ mod my_zome {
     }
 
     #[entry_def]
-    fn author_def() -> ValidatingEntryType {
-        Author::entry_def()
+    fn profile_def() -> ValidatingEntryType {
+        Profile::entry_def()
+    }
+    
+    #[entry_def]
+    fn user_def() -> ValidatingEntryType {
+        User::entry_def()
     }
 
     #[entry_def]
@@ -47,26 +53,28 @@ mod my_zome {
     }
 
     #[zome_fn("hc_public")]
-    pub fn get_author(address: Address) -> ZomeApiResult<Author> {
+    pub fn get_profile(address: Address) -> ZomeApiResult<Profile> {
+        hdk::utils::get_as_type(address)
+    }
+    
+    #[zome_fn("hc_public")]
+    pub fn get_user(address: Address) -> ZomeApiResult<User> {
         hdk::utils::get_as_type(address)
     }
 
     #[zome_fn("hc_public")]
-    pub fn register(author: Author) -> ZomeApiResult<Address> {
-        author::register(author)
+    pub fn register(author: Profile) -> ZomeApiResult<Address> {
+        profile::register(author)
+    }
+    
+    #[zome_fn("hc_public")]
+    pub fn get_article(address: Address) -> ZomeApiResult<Article> {
+        hdk::utils::get_as_type(address)
     }
 
     #[zome_fn("hc_public")]
-    pub fn get_me() -> ZomeApiResult<Author> {
-        let author = hdk::utils::get_links_and_load_type(
-            *hdk::AGENT_ADDRESS,
-            LinkMatch::Exactly("author"),
-            LinkMatch::Any,
-        )?;
-        author
-            .into_iter()
-            .next()
-            .ok_or_else(|| ZomeApiError::Internal("Missing Author".into()))
+    pub fn get_me() -> ZomeApiResult<Address> {
+        profile::get_me()
     }
 
 }

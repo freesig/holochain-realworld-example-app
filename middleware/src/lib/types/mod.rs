@@ -1,4 +1,7 @@
 use serde_derive::{Deserialize, Serialize};
+use crate::hc_types;
+
+pub mod spec_types;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -54,5 +57,16 @@ pub mod login {
     pub struct User {
         email: String,
         password: String,
+    }
+}
+
+impl Author {
+    pub fn new(user: hc_types::User, profile: hc_types::Profile) -> Self {
+        Author{
+            username: user.username,
+            bio: profile.bio,
+            image: profile.image,
+            following: profile.following,
+        }
     }
 }

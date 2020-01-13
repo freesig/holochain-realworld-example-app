@@ -1,6 +1,6 @@
-use serde_derive::{Deserialize, Serialize};
-use chrono::{DateTime, Utc};
 use crate::types;
+use chrono::{DateTime, Utc};
+use serde_derive::{Deserialize, Serialize};
 
 pub type Address = String;
 
@@ -27,6 +27,20 @@ pub struct Author {
     pub following: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct User {
+    pub username: String,
+    pub email: String,
+    pub profile: Address,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct Profile {
+    pub bio: String,
+    pub image: String,
+    pub following: bool,
+}
+
 impl Article {
     pub fn new(article: types::Article, author: Address) -> Self {
         let created_at = Utc::now();
@@ -47,7 +61,7 @@ impl Article {
 
 impl From<types::register::User> for Author {
     fn from(register: types::register::User) -> Self {
-        Author{
+        Author {
             email: register.email,
             username: register.username,
             ..Default::default()

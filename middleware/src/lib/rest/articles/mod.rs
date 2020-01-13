@@ -1,7 +1,7 @@
+use crate::types::CreateArticle;
 use crate::ws::ZomeCall;
 use crate::State;
 use actix_web::{get, post, web, HttpResponse, Responder};
-use crate::types::CreateArticle;
 use serde_json::json;
 
 mod handler;
@@ -18,10 +18,9 @@ fn list_articles(data: web::Data<State>) -> impl Responder {
     }
 }
 
-
 #[post("/api/articles")]
 fn create_article(data: web::Data<State>, args: web::Json<CreateArticle>) -> impl Responder {
-    let r: HttpResponse = handler::create_article(&data.connection, args.article.clone()).unwrap_or_else(|e| HttpResponse::Ok().body(e));
+    let r: HttpResponse = handler::create_article(&data.connection, args.article.clone())
+        .unwrap_or_else(|e| HttpResponse::Ok().body(e));
     r
 }
-

@@ -1,14 +1,19 @@
+use crate::hc_types;
 use crate::types::{LoginUser, RegisterUser};
 use crate::ws::ZomeCall;
-use crate::hc_types;
 use crate::State;
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 use serde_json::json;
 
 #[post("/api/users")]
-fn register(data: web::Data<State>, args: web::Json<(RegisterUser)>) -> impl Responder {
+fn register(data: web::Data<State>, args: web::Json<RegisterUser>) -> impl Responder {
     let user = hc_types::Author::from(args.user.clone());
-    let register = ZomeCall::new("test-instance", "store", "register", json!({"author": user}));
+    let register = ZomeCall::new(
+        "test-instance",
+        "store",
+        "register",
+        json!({ "author": user }),
+    );
     let result = data.connection.call(&register).and_then(|r| r.inner());
     dbg!(&result);
     if let Ok(result) = result {

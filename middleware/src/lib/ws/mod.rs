@@ -1,7 +1,7 @@
+use serde_json::Value;
 use std::net::TcpStream;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
-use serde_json::Value;
 
 use websocket::client::{
     sync::{Reader, Writer},
@@ -34,7 +34,7 @@ pub struct ZomeCall {
     instance: String,
     zome: String,
     function: String,
-    args: Value, 
+    args: Value,
 }
 /**
 ## Connect to the websocket
@@ -102,7 +102,8 @@ impl ZomeCall {
     }
     //{"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": "test-instance", "zome": "hello", "function": "hello_holo", "args": {} }}
     fn json(&self) -> String {
-        let json = serde_json::json!({"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": self.instance, "zome": self.zome, "function": self.function, "args": self.args}});
+        let json = serde_json::json!({"id": "0", "jsonrpc": "2.0", "method": "call", 
+            "params": {"instance_id": self.instance, "zome": self.zome, "function": self.function, "args": self.args}});
         let r = json.to_string();
         dbg!(&r);
         r
@@ -155,7 +156,13 @@ impl Response {
                         _ => return Err(Error::Response("Invalid return type".into())),
                     };
                     if let Some(result) = result.get("Ok") {
-                        Ok(result.to_string())
+                        match result {
+                            Value::String(s) => Ok(s.clone()),
+                            _ => {
+                                dbg!(&result);
+                                Ok(dbg!(result.to_string()))
+                            },
+                        }
                     } else if let Some(error) = result.get("Err") {
                         Err(Error::Response(format!("Zome error {:?}", error)))
                     } else {

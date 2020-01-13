@@ -1,9 +1,9 @@
 use actix_web::{App, HttpServer};
 
-mod rest;
-pub mod ws;
-mod types;
 mod hc_types;
+mod rest;
+mod types;
+pub mod ws;
 
 struct State {
     connection: ws::Connection,
